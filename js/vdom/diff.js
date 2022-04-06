@@ -10,6 +10,17 @@ const	zip = (xs, ys) => {
 	return (zipped);
 };
 
+const	set_attrs = ($node, k, v) => {
+	if (k === "className") {
+		$node.setAttribute("class", v);
+	}
+	else if (k === "onClick" || k === "onSubmit") {
+
+	}
+	else
+		$node.setAttribute(k, v);
+};
+
 const	diffAttrs = (oldAttrs, newAttrs) => {
 	if (!oldAttrs || !newAttrs)
 		return (null);
@@ -19,7 +30,7 @@ const	diffAttrs = (oldAttrs, newAttrs) => {
 	//	setting newAttrs
 	for (const [k, v] of Object.entries(newAttrs)) {
 		patches.push(($node) => {
-			$node.setAttribute(k, v);
+			set_attrs($node, k, v);
 			return ($node);
 		});
 	}
