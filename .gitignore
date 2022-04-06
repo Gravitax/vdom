@@ -1,3 +1,3 @@
 .DS_STORE
-nodes_modules
+node_modules
 package-lock.json
