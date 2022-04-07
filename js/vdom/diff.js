@@ -1,4 +1,4 @@
-import render from "./render.js";
+import create from "./create.js";
 
 
 const	zip = (xs, ys) => {
@@ -10,7 +10,8 @@ const	zip = (xs, ys) => {
 	return (zipped);
 };
 
-const	set_attrs = ($node, k, v) => {
+const	set_attr = ($node, k, v) => {
+	console.log(k);
 	if (k === "className") {
 		$node.setAttribute("class", v);
 	}
@@ -21,22 +22,22 @@ const	set_attrs = ($node, k, v) => {
 		$node.setAttribute(k, v);
 };
 
-const	diffAttrs = (oldAttrs, newAttrs) => {
-	if (!oldAttrs || !newAttrs)
+const	diff_attrs = (old_attrs, new_attrs) => {
+	if (!old_attrs || !new_attrs)
 		return (null);
 
 	const	patches = [];
 
-	//	setting newAttrs
-	for (const [k, v] of Object.entries(newAttrs)) {
+	//	setting new_attrs
+	for (const [k, v] of Object.entries(new_attrs)) {
 		patches.push(($node) => {
-			set_attrs($node, k, v);
+			set_attr($node, k, v);
 			return ($node);
 		});
 	}
 	//	removing attrs
-	for (const k in oldAttrs) {
-		if (!(k in newAttrs)) {
+	for (const k in old_attrs) {
+		if (!(k in new_attrs)) {
 			patches.push(($node) => {
 				$node.removeAttribute(k);
 				return ($node);
@@ -51,32 +52,32 @@ const	diffAttrs = (oldAttrs, newAttrs) => {
 	});
 };
 
-const	diffChildren = (oldVChildren, newVChildren) => {
+const	diff_children = (oldVChildren, newVChildren) => {
 	if (!oldVChildren || !newVChildren)
 		return (null);
 
-	const	childPatches = [];
+	const	child_patches = [];
 
 	oldVChildren.forEach((oldVChild, i) => {
-		childPatches.push(diff(oldVChild, newVChildren[i]));
+		child_patches.push(diff(oldVChild, newVChildren[i]));
 	});
 
-	const	additionalPatches = [];
+	const	additional_patches = [];
 
   	for (const additionalVChild of newVChildren.slice(oldVChildren.length)) {
-    	additionalPatches.push(($node) => {
-    		$node.appendChild(render(additionalVChild));
+    	additional_patches.push(($node) => {
+    		$node.appendChild(create(additionalVChild));
     		return ($node);
     	});
 	}
 
 	return (($parent) => {
-		//	since childPatches are expecting the $child, not $parent,
+		//	since child_patches are expecting the $child, not $parent,
 		//	we cannot just loop through them and call patch($parent)
-    	for (const [patch, $child] of zip(childPatches, $parent.childNodes)) {
+    	for (const [patch, $child] of zip(child_patches, $parent.childNodes)) {
 			patch($child);
 		}
-		for (const patch of additionalPatches) {
+		for (const patch of additional_patches) {
 			patch($parent);
 		}
 		return ($parent);
@@ -100,9 +101,9 @@ const	diff = (oldVTree, newVTree) => {
 			//	1. both trees are string and they have different values
 			//	2. one of the trees is text node and
 			//		the other one is elem node
-			//	Either case, we will just render(newVTree)!
+			//	Either case, we will just create(newVTree)!
 			return (($node) => {
-				const	$newNode = render(newVTree);
+				const	$newNode = create(newVTree);
 				
 				$node.replaceWith($newNode);
 				return ($newNode);
@@ -116,21 +117,21 @@ const	diff = (oldVTree, newVTree) => {
 	if (oldVTree.tagName !== newVTree.tagName) {
 		//	we assume that they are totally different and 
     	//	will not attempt to find the differences.
-    	//	simply render the newVTree and mount it.
+    	//	simply create the newVTree and mount it.
 		return (($node) => {
-			const	$newNode = render(newVTree);
+			const	$newNode = create(newVTree);
 
 			$node.replaceWith($newNode);
 			return ($newNode);
 		});
 	}
 
-	const	patchAttrs		= diffAttrs(oldVTree.attrs, newVTree.attrs);
-	const	patchChildren	= diffChildren(oldVTree.children, newVTree.children);
+	const	patch_attrs		= diff_attrs(oldVTree.attrs, newVTree.attrs);
+	const	patch_children	= diff_children(oldVTree.children, newVTree.children);
 
 	return (($node) => {
-		if (patchAttrs)		patchAttrs($node);
-		if (patchChildren)	patchChildren($node);
+		if (patch_attrs)	patch_attrs($node);
+		if (patch_children)	patch_children($node);
 		return ($node);
 	});
 };

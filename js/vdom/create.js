@@ -14,7 +14,7 @@ const	set_attrs = ($target, attrs) => {
 	});
 };
 
-const	render_element = ({ tagName, attrs, children = [] }) => {
+const	create_element = ({ tagName, attrs, children = [] }) => {
 	//	create the element
 	//		e.g. <div></div>
 	const	$elt = document.createElement(tagName);
@@ -25,16 +25,16 @@ const	render_element = ({ tagName, attrs, children = [] }) => {
 	//	append all children as specified in vNode.children
   	//		e.g. <div id="app"><img /></div>
 	for (const child of children)
-		$elt.appendChild(render(child));
+		$elt.appendChild(create(child));
 	return ($elt);
 };
 
-const	render = (vNode) => {
+const	create = (vNode) => {
 	if (typeof(vNode) === "string") {
 		return (document.createTextNode(vNode));
 	}
-	return (render_element(vNode));
+	return (create_element(vNode));
 };
 
 
-export default render;
+export default create;

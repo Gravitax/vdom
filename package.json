@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "babel ./src/*.js --out-file ./js/compiled.js"
   },
   "repository": {
