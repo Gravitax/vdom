@@ -1,36 +1,26 @@
-import create_element from "../js/vdom/create_element.js";
+import { React } from "../js/react.js";
 
 
-const	onclick_event = (e) => {
-	e.preventDefault();
-	alert("test");
-}
-
-// const	useSate = (state) => {
-// 	const	setState = () => {
-
-// 	};
-// };
-
-const	App = (count) => {
-	// const	[state, setState] = useState(0);
-
+function	App() {
+	const	[state, setState] = React.useState(1);
+	
 	return (
-		<div className="foo" id="bar">
-			<p className="text">
-				Lorem, ipsum dolor.
-				<br />
-				<b>test</b>
+		<div>
+			<h1>Hello ByteConf!</h1>
+			<p>1111</p>
+			<p>
+				<p>22222</p>
+				<p>33333</p>
 			</p>
-			<i onClick={onclick_event}>Lorem, ipsum.</i>
-			<Test dataCount={count}>
-				<div>
-					Hello world ! {count.toString()}
-				</div>
-			</Test>
+			<button onClick={() => setState(state + 1)}>{state}</button>
+			{/* <Test dataCount={count}>
+ 				<div>
+ 					Hello world ! {count.toString()}
+ 				</div>
+ 			</Test> */}
 		</div>
 	);
-};
+}
 
 
 export default App;

@@ -11,7 +11,6 @@ const	zip = (xs, ys) => {
 };
 
 const	set_attr = ($node, k, v) => {
-	console.log(k);
 	if (k === "className") {
 		$node.setAttribute("class", v);
 	}
