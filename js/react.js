@@ -4,7 +4,7 @@ import { createElement, performUnitOfWork, commitWork } from "./utils.js";
 let	wipRoot, currentRoot, nextUnitOfWork = null;
 let	hookIndex = 0;
 
-const	workLoop = (deadline) => {
+const	performWork = (deadline) => {
 	let	shouldYield = false;
 
 	while (!shouldYield && nextUnitOfWork) {
@@ -29,7 +29,7 @@ const	workLoop = (deadline) => {
 		wipRoot		= null;
 		hookIndex	= 0;
 	}
-	requestIdleCallback(workLoop);
+	requestIdleCallback(performWork);
 };
 
 // fiber rendering
@@ -45,37 +45,8 @@ const	render = (node, container) => {
 		},
 	};
 	nextUnitOfWork = wipRoot;
-	requestIdleCallback(workLoop);
+	requestIdleCallback(performWork);
 };
-
-const	NONE = Symbol("__NONE__");
-
-const	scheduleRerender = () => {
-	wipRoot = {
-		dom			: currentRoot.dom,
-		props		: currentRoot.props,
-		alternate	: currentRoot,
-		hooks		: [],
-	};
-	nextUnitOfWork = wipRoot;
-};
-
-const	useState = (initial) => {
-	const	oldHook			= wipRoot?.alternate?.hooks[hookIndex++];
-	const	hasPendingState	= oldHook && oldHook.pendingState !== NONE;
-	const	oldState		= oldHook ? oldHook.state : initial;
-	const	hook = {
-		state			: hasPendingState ? oldHook?.pendingState : oldState,
-		pendingState	: NONE,
-	};
-	const	setState = (newState) => {
-		hook.pendingState = newState;
-		scheduleRerender();
-	};
-	wipRoot?.hooks.push(hook);
-	return ([hook.state, setState]);
-};
-
 // recursive rendering
 const	render_recursive = (element, container) => {
 	if (typeof(element.type) === "function") element = element.type();
@@ -96,5 +67,49 @@ const	render_recursive = (element, container) => {
 	container.appendChild(dom);
 };
 
+const	NONE = Symbol("__NONE__");
 
-export const	React = { createElement, useState, render, render_recursive };
+const	scheduleRerender = () => {
+	wipRoot = {
+		dom			: currentRoot.dom,
+		props		: currentRoot.props,
+		alternate	: currentRoot,
+		hooks		: [],
+	};
+	nextUnitOfWork = wipRoot;
+};
+
+// HOOKS
+
+const	useEffect = (callback, dependencies = []) => {
+	// use effect hook actualise le component
+	// si une dépendence est modifiée ou au refresh de la page
+
+	// WIP
+
+	if (typeof(callback) === "function")
+		callback();
+};
+
+const	useState = (initial) => {
+	const	oldHook			= wipRoot?.alternate?.hooks[hookIndex++];
+	const	hasPendingState	= oldHook && oldHook.pendingState !== NONE;
+	const	oldState		= oldHook ? oldHook.state : initial;
+	const	hook = {
+		state			: hasPendingState ? oldHook?.pendingState : oldState,
+		pendingState	: NONE,
+	};
+	const	setState = (newState) => {
+		hook.pendingState = newState;
+		scheduleRerender();
+	};
+	wipRoot?.hooks.push(hook);
+	return ([hook.state, setState]);
+};
+
+
+export const	React = {
+	createElement,
+	useState, useEffect,
+	render, render_recursive
+};

@@ -91,6 +91,12 @@ export const	performUnitOfWork = (fiber, resetWipFiber = noop) => {
 	}
 };
 
+const	set_attribute = (dom, nextProps, name) => {
+	if (name === "className")
+		name = "class";
+	dom.setAttribute(name, nextProps[name]);
+};
+
 // COMMIT
 const	updateDom = (dom, prevProps, nextProps) => {
 	const	isGone		= (prev, next) => (key) => !(key in next);
@@ -119,9 +125,9 @@ const	updateDom = (dom, prevProps, nextProps) => {
 		.filter(isProperty)
 		.filter(isNew(prevProps, nextProps))
 		.forEach((name) => {
-			// if (!dom[name]) {
-			// 	dom.setAttribute(name, nextProps[name]);
-			// }
+			if (name !== "nodeValue") {
+				set_attribute(dom, nextProps, name);
+			}
 			dom[name] = nextProps[name];
 		});
 	// Add event listeners
