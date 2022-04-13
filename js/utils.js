@@ -119,9 +119,9 @@ const	updateDom = (dom, prevProps, nextProps) => {
 		.filter(isProperty)
 		.filter(isNew(prevProps, nextProps))
 		.forEach((name) => {
-			if (!dom[name]) {
-				dom.setAttribute(name, nextProps[name]);
-			}
+			// if (!dom[name]) {
+			// 	dom.setAttribute(name, nextProps[name]);
+			// }
 			dom[name] = nextProps[name];
 		});
 	// Add event listeners

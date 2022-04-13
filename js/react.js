@@ -79,9 +79,10 @@ const	useState = (initial) => {
 // recursive rendering
 const	render_recursive = (element, container) => {
 	if (typeof(element.type) === "function") element = element.type();
+
+	console.log(element);
 	const	dom = element.type === "TEXT_ELEMENT"
-		? document.createTextNode("")
-		: document.createElement(element.type);
+		? document.createTextNode("") : document.createElement(element.type);
 	const	isProperty = (key) => key !== "children";
 
 	Object.keys(element.props)
