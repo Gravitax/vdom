@@ -1,42 +1,10 @@
 import { createElement, performUnitOfWork, commitWork } from "./utils.js";
 
 
-export const React = { createElement, createRoot, useState };
-
 let	wipRoot, currentRoot, nextUnitOfWork = null;
 let	hookIndex = 0;
 
-console.log(wipRoot);
-
-function	scheduleRerender() {
-	nextUnitOfWork = wipRoot = {
-		dom			: currentRoot.dom,
-		props		: currentRoot.props,
-		alternate	: currentRoot,
-		hooks		: [],
-	};
-}
-
-// fiber
-function createRoot(container) {
-	return ({
-		render : (el) => {
-			wipRoot = {
-				dom			: container,
-				props		: {
-					children	: [el]
-				},
-				hooks		: [],
-				alternate	: {
-					hooks		: [],
-				},
-			};
-			nextUnitOfWork = wipRoot;
-		}
-	});
-}
-
-function workLoop(deadline) {
+const	workLoop = (deadline) => {
 	let	shouldYield = false;
 
 	while (!shouldYield && nextUnitOfWork) {
@@ -62,14 +30,37 @@ function workLoop(deadline) {
 		hookIndex	= 0;
 	}
 	requestIdleCallback(workLoop);
-}
-requestIdleCallback(workLoop);
+};
 
-const NONE = Symbol("__NONE__");
+// fiber rendering
+const	render = (node, container) => {
+	wipRoot = {
+		dom			: container,
+		props		: {
+			children	: [node],
+		},
+		hooks		: [],
+		alternate	: {
+			hooks		: [],
+		},
+	};
+	nextUnitOfWork = wipRoot;
+	requestIdleCallback(workLoop);
+};
 
-function useState(initial) {
-	console.log("useState");
-	console.log(wipRoot);
+const	NONE = Symbol("__NONE__");
+
+const	scheduleRerender = () => {
+	wipRoot = {
+		dom			: currentRoot.dom,
+		props		: currentRoot.props,
+		alternate	: currentRoot,
+		hooks		: [],
+	};
+	nextUnitOfWork = wipRoot;
+};
+
+const	useState = (initial) => {
 	const	oldHook			= wipRoot?.alternate?.hooks[hookIndex++];
 	const	hasPendingState	= oldHook && oldHook.pendingState !== NONE;
 	const	oldState		= oldHook ? oldHook.state : initial;
@@ -81,6 +72,28 @@ function useState(initial) {
 		hook.pendingState = newState;
 		scheduleRerender();
 	};
-	wipRoot.hooks.push(hook);
+	wipRoot?.hooks.push(hook);
 	return ([hook.state, setState]);
-}
+};
+
+// recursive rendering
+const	render_recursive = (element, container) => {
+	if (typeof(element.type) === "function") element = element.type();
+	const	dom = element.type === "TEXT_ELEMENT"
+		? document.createTextNode("")
+		: document.createElement(element.type);
+	const	isProperty = (key) => key !== "children";
+
+	Object.keys(element.props)
+		.filter(isProperty)
+		.forEach((name) => {
+			dom[name] = element.props[name];
+		});
+	// eslint-disable-next-line
+	element.props.children?.forEach((child) => render_recursive(child, dom));
+	// recursion!                               👆
+	container.appendChild(dom);
+};
+
+
+export const	React = { createElement, useState, render, render_recursive };

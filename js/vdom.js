@@ -3,6 +3,7 @@ import { React } from "./react.js";
 import App from "./compiled.js";
 
 
-const	container = document.getElementById("root");
+const	container	= document.getElementById("root");
+const	vApp		= React.createElement(App, null);
 
-React.createRoot(container).render(App());
+React.render(vApp, container);
