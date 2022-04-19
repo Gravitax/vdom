@@ -47,25 +47,6 @@ const	render = (node, container) => {
 	nextUnitOfWork = wipRoot;
 	requestIdleCallback(performWork);
 };
-// recursive rendering
-const	render_recursive = (element, container) => {
-	if (typeof(element.type) === "function") element = element.type();
-
-	console.log(element);
-	const	dom = element.type === "TEXT_ELEMENT"
-		? document.createTextNode("") : document.createElement(element.type);
-	const	isProperty = (key) => key !== "children";
-
-	Object.keys(element.props)
-		.filter(isProperty)
-		.forEach((name) => {
-			dom[name] = element.props[name];
-		});
-	// eslint-disable-next-line
-	element.props.children?.forEach((child) => render_recursive(child, dom));
-	// recursion!                               👆
-	container.appendChild(dom);
-};
 
 const	NONE = Symbol("__NONE__");
 
@@ -80,7 +61,6 @@ const	scheduleRerender = () => {
 };
 
 // HOOKS
-
 const	useEffect = (callback, dependencies = []) => {
 	// use effect hook actualise le component
 	// si une dépendence est modifiée ou au refresh de la page
@@ -111,5 +91,5 @@ const	useState = (initial) => {
 export const	React = {
 	createElement,
 	useState, useEffect,
-	render, render_recursive
+	render
 };

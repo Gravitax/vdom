@@ -55,7 +55,6 @@ const	reconcileChildren = (wipFiber, elements) => {
 		}
 		if (oldFiber && !sameType) {
 			oldFiber.effectTag = "DELETION";
-			// deletions.push(oldFiber)
 		}
 		if (oldFiber) {
 			oldFiber = oldFiber.sibling;
@@ -92,16 +91,19 @@ export const	performUnitOfWork = (fiber, resetWipFiber = noop) => {
 };
 
 const	set_attribute = (dom, nextProps, name) => {
-	if (name === "className")
-		name = "class";
-	dom.setAttribute(name, nextProps[name]);
+	if (name !== "nodeValue") {
+		if (name === "className")
+			name = "class";
+		dom.setAttribute(name, nextProps[name]);
+	}
+	dom[name] = nextProps[name];
 };
 
 // COMMIT
 const	updateDom = (dom, prevProps, nextProps) => {
 	const	isGone		= (prev, next) => (key) => !(key in next);
 	const	isNew		= (prev, next) => (key) => prev[key] !== next[key];
-	const	isEvent		= (key) => key.startsWith("on");
+	const	isEvent		= (key) => key.startsWith("on") || key.startsWith("mouse");
 	const	isProperty	= (key) => key !== "children" && !isEvent(key);
 
 	// Remove old or changed event listeners
@@ -109,7 +111,10 @@ const	updateDom = (dom, prevProps, nextProps) => {
 		.filter(isEvent)
 		.filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
 		.forEach((name) => {
-			const	eventType = name.toLowerCase().substring(2);
+			const	eventType = name.toLowerCase();
+			
+			if (eventType.startsWith("on"))
+				eventType = eventType.substring(2);
 
 			dom.removeEventListener(eventType, prevProps[name]);
 		});
@@ -125,17 +130,17 @@ const	updateDom = (dom, prevProps, nextProps) => {
 		.filter(isProperty)
 		.filter(isNew(prevProps, nextProps))
 		.forEach((name) => {
-			if (name !== "nodeValue") {
-				set_attribute(dom, nextProps, name);
-			}
-			dom[name] = nextProps[name];
+			set_attribute(dom, nextProps, name);
 		});
 	// Add event listeners
 	Object.keys(nextProps)
 		.filter(isEvent)
 		.filter(isNew(prevProps, nextProps))
 		.forEach((name) => {
-			const	eventType = name.toLowerCase().substring(2);
+			const	eventType = name.toLowerCase();
+			
+			if (eventType.startsWith("on"))
+				eventType = eventType.substring(2);
 
 			dom.addEventListener(eventType, nextProps[name]);
 		});

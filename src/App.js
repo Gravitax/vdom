@@ -3,10 +3,21 @@ import { React } from "../js/react.js";
 
 function	App() {
 	const	[state, setState] = React.useState(0);
-	
+
+	let		count = Array.from(Array(900).keys());
+	let		elt = [];
+
+	const	test_mouse = (e) => {
+		console.log(e);
+		e.target.classList.toggle("active");
+	};
+	count.forEach((i) => {
+		elt[i] = <span mouseover={test_mouse} class="mySpan"></span>;
+	});
+
 	return (
 		<div id="foo" custom="bar">
-			<ul>
+			{/* <ul>
 				<li>1</li>
 				<li>2</li>
 				<li>3</li>
@@ -36,7 +47,8 @@ function	App() {
 				<button onClick={() => setState(state + 1)}>+</button>&nbsp;
 				<button onClick={() => setState(state - 1)}>-</button>&nbsp;&nbsp;
 				<b>{state}</b>
-			</p>
+			</p> */}
+			{elt}
 		 </div>
 	);
 }
