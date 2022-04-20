@@ -1,6 +1,11 @@
+body, html {
+	margin: 0; padding: 0;
+	display: flex; justify-content: center; align-items: center;
+	height: 100vh; width: 100vw;
+}
+
 .mySpan {
-	height: 100vh;
-	width: 0.1vw;
+	height: 80vh; width: 1vw;
 	background-color: red;
 	display: inline-block;
 }
