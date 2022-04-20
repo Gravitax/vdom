@@ -6,8 +6,9 @@ let	hookIndex = 0;
 
 const	commitRoot = () => {
 	commitWork(wipRoot.child);
-	currentRoot = wipRoot;
-	wipRoot = null;
+	currentRoot	= wipRoot;
+	wipRoot		= null;
+	hookIndex	= 0;
 };
 
 const	performWork = (deadline) => {

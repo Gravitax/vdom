@@ -9,9 +9,9 @@ function	App() {
 	return (
 		<div id="foo" custom="bar">
 
-			{count.map(() => <span class="mySpan" onClick={() => alert("click")} mouseOver={(e) => e.target.classList.toggle("active")}></span>)}
+			{/* {count.map(() => <span class="mySpan" onClick={() => alert("click")} mouseOver={(e) => e.target.classList.toggle("active")}></span>)} */}
 
-			{/* <ul>
+			<ul>
 				<li>1</li>
 				<li>2</li>
 				<li>3</li>
@@ -41,7 +41,7 @@ function	App() {
 				<button onClick={() => setState(state + 1)}>+</button>&nbsp;
 				<button onClick={() => setState(state - 1)}>-</button>&nbsp;&nbsp;
 				<b>{state}</b>
-			</p> */}
+			</p>
 
 		 </div>
 	);
