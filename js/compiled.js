@@ -25,6 +25,8 @@ function App() {
 export default App;
 const PrintStr = (...data) => {
   return /*#__PURE__*/React.createElement("b", {
-    className: data[0]?.className
+    id: "foo",
+    className: data[0]?.className,
+    custom: "lorem"
   }, data[0]?.str, data[0]?.children);
 };

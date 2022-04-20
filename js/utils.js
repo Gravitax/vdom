@@ -99,10 +99,12 @@ export const	performUnitOfWork = (fiber, resetWipFiber = noop) => {
 	}
 };
 
-const	isEvent		= (key) => key.startsWith("on") || key.startsWith("mouse");
-const	isProperty	= (key) => key !== "children";
+const	isGone		= (prev, next) => (key) => !(key in next);
+const	isNew		= (prev, next) => (key) => prev[key] !== next[key];
+const	isEvent		= (key) => key.startsWith("on") || key.startsWith("mouse");
+const	isProperty	= (key) => key !== "children" && !isEvent(key);
 
-const	eventName = (name) => {
+const	eventType = (name) => {
 	name = name.toLowerCase();
 	if (name.startsWith("on"))
 		name = name.substring(2);
@@ -110,39 +112,46 @@ const	eventName = (name) => {
 };
 
 const	set_attribute = (dom, nextProps, name) => {
+	let	tmp = name;
+
 	if (name !== "nodeValue") {
 		if (name === "className")
-			name = "class";
-		dom.setAttribute(name, nextProps[name]);
+			tmp = "class";
+		dom.setAttribute(tmp, nextProps[name]);
 	}
-	dom[name] = nextProps[name];
+	dom[tmp] = nextProps[name];
 };
 
-
 const	updateDom = (dom, prevProps, nextProps) => {
+	// Remove old or changed event listeners
+	Object.keys(prevProps)
+		.filter(isEvent)
+		.filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
+		.forEach((name) => {
+			dom.removeEventListener(eventType(name), prevProps[name]);
+		});
+	// Remove old properties
 	Object.keys(prevProps)
 		.filter(isProperty)
+		.filter(isGone(prevProps, nextProps))
 		.forEach((name) => {
-			if (isEvent(name)) {
-				dom.removeEventListener(eventName(name), prevProps[name]);
-			}
-			else if (name in nextProps) {
-				dom[name] = "";
-			}
+			dom[name] = "";
 		});
+	// Set new or changed properties
 	Object.keys(nextProps)
 		.filter(isProperty)
+		.filter(isNew(prevProps, nextProps))
 		.forEach((name) => {
-			if (isEvent(name)) {
-				if (prevProps[name])
-					dom.removeEventListener(eventName(name), prevProps[name]);
-				dom.addEventListener(eventName(name), nextProps[name]);
-			}
-			else if (prevProps[name] != nextProps[name]) {
-				set_attribute(dom, nextProps, name);
-			}
+			set_attribute(dom, nextProps, name);
 		});
-}
+	// Add event listeners
+	Object.keys(nextProps)
+		.filter(isEvent)
+		.filter(isNew(prevProps, nextProps))
+		.forEach((name) => {
+			dom.addEventListener(eventType(name), nextProps[name]);
+		});
+};
 
 const	commitDeletion = (fiber, domParent) => {
 	if (!fiber) return ;
